@@ -12,7 +12,24 @@ const routes = [
   {
     path: '/',
     name: 'movie',
-    component: MovieView
+    component: MovieView,
+    children: [
+      {
+        path: 'cinema',
+        name: 'cinema',
+        component: () => import('../views/MovieViewSons/CinemaView.vue')
+      },
+      {
+        path:'awaitMovie',
+        name:'awaitMovie',
+        component:() => import('../views/MovieViewSons/AwaitMovieView.vue')
+      },
+      {
+        path:'sutraMovie',
+        name:'sutraMovie',
+        component:() => import('../views/MovieViewSons/SutraMovieView.vue')
+      }
+    ]
   },
   {
     path: '/video',
