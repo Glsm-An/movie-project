@@ -1,34 +1,30 @@
 <template>
-    <div class="movie">
+    <div>
         <div class="home-screen">
-            <div class="left-select">
-                <span class="city">广州</span>
+            <div class="left-select" @click="goCity">
+                <span class="city">{{ city.nm }}</span>
                 <van-icon name="play" size="8" color="#666" />
             </div>
             <van-tabs class="tabbar" v-model="active" line-width="21" :ellipsis=false>
-                <van-tab to="/" title="热映"></van-tab>
+                <van-tab :to="{ name: 'hotMovie' }" title="热映"></van-tab>
                 <van-tab to="/cinema" title="影院"></van-tab>
                 <van-tab to="/awaitMovie" title="待映"></van-tab>
                 <van-tab to="/sutraMovie" title="经典电影"></van-tab>
             </van-tabs>
-            <div>
-                <van-icon name="search" color="#EF4238" />
-            </div>
+         
+                <router-link tag="div" :to="{name:'search'}">
+                    <van-icon name="search" color="#EF4238" />
+                </router-link>
         </div>
-
-        <!-- 最受好评电影 -->
-        <div class="good-movie">
-            <p class="title">{{ title }}</p>
-            <van-grid :gutter="10">
-                <van-grid-item v-for="value in 8" :key="value" icon="photo-o" text="文字" />
-            </van-grid>
-        </div>
+        <!-- <HotMovieView /> -->
+        <router-view></router-view>
     </div>
 </template>
 
 
 <script>
-import { getGoodMovie } from "../apis/movie"
+import { mapState } from 'vuex';
+// import HotMovieView from "./MovieViewSons/HotMovieView.vue";
 const activeIndex = {
     movie: 0,
     cinema: 1,
@@ -36,18 +32,18 @@ const activeIndex = {
     sutraMovie: 3
 }
 export default {
+    // components: { HotMovieView },
     data() {
         return {
             title: '',
-            goodmovielist: []
-        }
+            city:{}
+        };
     },
-    async mounted() {
-        let { title, movieLis } = await getGoodMovie();
-        this.title = title;
-        this.goodmovielist = movieLis
+    mounted() {
+        this.getCity()
     },
     computed: {
+        ...mapState(["currentCity"]),
         active: {
             get() {
                 const { name } = this.$route;
@@ -57,6 +53,23 @@ export default {
             set() { },
         },
     },
+    methods:{
+        goCity(){
+            this.$router.push({
+                name:'city-list',
+            })
+        },
+        getCity(){
+            this.city = JSON.parse(localStorage.city) 
+        }
+    },
+    watch:{
+        currentCity(){
+            this.$nextTick(() => {
+                this.getCity();
+            })
+        }
+    }
 }
 </script>
 
@@ -98,18 +111,6 @@ export default {
 
     .van-tabs__line {
         background-color: #f03d37;
-    }
-}
-
-.good-movie {
-    padding: 12px 15px;
-    background-color: #fff;
-    margin-bottom: 10px;
-
-    .title {
-        font-size: 14px;
-        color: #333;
-        margin: 0 0 12px;
     }
 }
 </style>

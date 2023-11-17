@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <van-nav-bar class="top-nav" title="猫眼电影" @click-right="listShow = !listShow">
+    <van-nav-bar class="top-nav" title="猫眼电影" @click-right="listShow = !listShow" v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails')"   @click-left="onClickLeft">
+      <template #left>
+        <van-icon name="arrow-left" size="20" v-if="(path == '/search')"/>
+  </template>
       <template #right>
         <van-icon name="wap-nav" size="20" />
         <div class="nav-list" v-show="listShow">
@@ -13,7 +16,9 @@
     </van-nav-bar>
 
     <!-- 底部导航栏 -->
-    <van-tabbar class="tabbar" route v-model="active" active-color="#f03d37" inactive-color="#696969">
+    <van-tabbar class="tabbar" route v-model="active" active-color="#f03d37" inactive-color="#696969"
+    v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails' || path == '/search')"
+    >
       <van-tabbar-item to="/" icon="home-o" title="电影/影院">电影/影院</van-tabbar-item>
       <van-tabbar-item to="/video" icon="tv-o">视频</van-tabbar-item>
       <van-tabbar-item to="/shortvideo" icon="video-o">小视频</van-tabbar-item>
@@ -39,11 +44,14 @@ const activeIndex = {
 export default {
   data() {
     return {
-      listShow: false
+      listShow: false,
+      path:''
     };
   },
   methods: {
-
+    onClickLeft(){
+      this.$router.go(-1);
+    }
   },
   computed: {
     //根据路由信息中的name属性来给予相应的高亮
@@ -54,6 +62,14 @@ export default {
         return index;
       },
       set() { },
+    }
+  },
+  mounted(){
+    this.path = this.$route.path
+  },
+  watch:{
+    $route(to){
+      this.path = to.path
     }
   }
 }
@@ -107,4 +123,5 @@ export default {
     }
   }
 }
+
 </style>

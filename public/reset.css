@@ -88,7 +88,8 @@ video {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	font-family: Helvetica, sans-serif, STHeiTi;
+	font-family: PingFangSC-Regular,Hiragino Sans GB,sans-serif,Helvetica,宋体;
+	/* font-family: Helvetica, sans-serif, STHeiTi; */
 	font-size: 14px/1.5;
 	font-style: normal;
 	vertical-align: baseline;
