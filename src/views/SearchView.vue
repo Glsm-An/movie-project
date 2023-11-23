@@ -30,7 +30,7 @@
                                     <span class="version v2d imax" v-show="s.version != ''"></span>
                                 </p>
                                 <span class="score" v-show="s.sc">
-                                    <span class="num">{{ s.sc.toFixed(1) }}</span>分
+                                    <span class="num">{{ s.sc }}</span>分
                                 </span>
                             </div>
                             <div class="detail-section">

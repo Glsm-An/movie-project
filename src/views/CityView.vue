@@ -3,7 +3,7 @@
         <van-index-bar :index-list="indexList">
             <van-index-anchor index="定位">定位城市</van-index-anchor>
             <van-cell class="none-border">
-                <div class="location-city ">定位失败,请稍后再试</div>
+                <div class="location-city ">{{ posationCity }}</div>
             </van-cell>
             <van-index-anchor index="最近">最近访问城市</van-index-anchor>
             <van-cell class="none-border">
@@ -26,6 +26,8 @@
         </van-index-bar>
         <!-- {{ indexList }} -->
         <!-- {{ cityHandleArr }} -->
+        <div id="container"></div>
+        <div id="allmap"></div>
     </div>
 </template>
 
@@ -44,7 +46,8 @@ export default {
             cityObj: {
                 id: '',
                 citynm: ''
-            }
+            },
+            posationCity:'',
         }
     },
     // created() {
@@ -55,6 +58,8 @@ export default {
         //获取最近访问城市列表
         this.getHistoryCity();
         // this.cityHandle();
+        // this.dingwei();
+        this.IPdingwei();
     },
     methods: {
         ...mapMutations(["setCity", "setHotCityArr"]),
@@ -170,6 +175,40 @@ export default {
             cityObj = JSON.parse(cityObj);
             this.cityObj = cityObj;
         },
+        // dingwei() {
+        //     var point = new window.BMapGL.Point(116.331398, 39.897445);
+        //     var map = new window.BMapGL.Map("container");
+        //     map.centerAndZoom(point, 12);
+
+        //     var geolocation = new window.BMapGL.Geolocation();
+        //     geolocation.getCurrentPosition(function (r) {
+        //         if (this.getStatus() == window.BMAP_STATUS_SUCCESS) {
+        //             var mk = new window.BMapGL.Marker(r.point);
+        //             map.addOverlay(mk);
+        //             map.panTo(r.point);
+        //             console.log('您的位置：' + r.point.lng + ',' + r.point.lat);
+        //         }
+        //         else {
+        //             alert('错误信息' + this.getStatus());
+        //         }
+        //     });
+        // },
+        //使用IP定位(速度更快)
+        IPdingwei() {
+            let _this = this;
+            var map = new window.BMapGL.Map("allmap");
+            var point = new window.BMapGL.Point(116.331398, 39.897445);
+            map.centerAndZoom(point, 12);
+
+            function myFun(result) {
+                var cityName = result.name;
+                map.setCenter(cityName);
+                console.log("当前定位城市:" + cityName);
+                _this.posationCity = cityName
+            }
+            var myCity = new window.BMapGL.LocalCity();
+            myCity.get(myFun);
+        }
     },
     computed: {
         ...mapState(["cityArr", "hotCity"]),

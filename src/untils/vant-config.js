@@ -1,4 +1,4 @@
-import { Tabbar, TabbarItem, Icon, Popover, NavBar, Tab, Tabs, Grid, GridItem, Image as VanImage, IndexBar, IndexAnchor, Button, Cell, CellGroup, Rate, Progress, Collapse, CollapseItem ,PullRefresh ,Search ,List } from 'vant';
+import { Tabbar, TabbarItem, Icon, Popover, NavBar, Tab, Tabs, Grid, GridItem, Image as VanImage, IndexBar, IndexAnchor, Button, Cell, CellGroup, Rate, Progress, Collapse, CollapseItem, PullRefresh, Search, List, DropdownMenu, DropdownItem ,Picker ,ShareSheet,TreeSelect ,Badge,Tag ,Toast ,Dialog } from 'vant';
 
 export default {
     install(Vue) {
@@ -24,5 +24,14 @@ export default {
         Vue.use(PullRefresh)
         Vue.use(Search)
         Vue.use(List)
+        Vue.use(DropdownMenu)
+        Vue.use(DropdownItem)
+        Vue.use(Picker)
+        Vue.use(ShareSheet)
+        Vue.use(TreeSelect)
+        Vue.use(Badge)
+        Vue.use(Tag)
+        Vue.use(Toast)
+        Vue.use(Dialog)
     }
 }

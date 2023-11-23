@@ -1,5 +1,6 @@
 <template>
     <div class="hot-movie">
+        <GoTop />
         <!-- 最受好评电影 -->
         <div class="good-movie">
             <p class="title">{{ title }}</p>
@@ -16,9 +17,10 @@
         </div>
         <!-- 近日热播 -->
         <div>
-            <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+            <van-list v-model="loading" :finished="finished" finished-text="我也是有底线的o(〃＾▽＾〃)o" @load="onLoad">
                 <!-- <div class="main-block" v-for="h in hotMovieList" :key="h.id"> -->
-                    <router-link class="main-block" tag="div" v-for="h in hotMovieList" :key="h.id" :to="{name : 'moviedetails',query:{id: h.id}}">
+                <router-link class="main-block" tag="div" v-for="h in hotMovieList" :key="h.id"
+                    :to="{ name: 'moviedetails', query: { id: h.id } }">
                     <div class="avatar">
                         <div class="default-img-bg">
                             <img :src="h.img">
@@ -33,7 +35,7 @@
                             <div class="detail column">
                                 <div class="score line-ellipsis" v-if="h.sc">
                                     <span class="score-suffix">观众评 </span>
-                                    <span class="grade">{{ h.sc }}</span>
+                                    <span class="grade">{{ h.sc.toFixed(1) }}</span>
                                 </div>
                                 <div class="score line-ellipsis" v-else>
                                     <span class="grade">{{ h.wish }}</span>
@@ -46,12 +48,17 @@
                         </div>
                         <div class="button-block">
                             <div class="btn normal"
-                                style="background-color:#F03D37;box-shadow:0 0.04rem 0.04rem 0 rgba(240,61,55, 0.15)">
+                                style="background-color:#F03D37;box-shadow:0 0.04rem 0.04rem 0 rgba(240,61,55, 0.15)" v-if="h.showStateButton.content == '购票' ">
+                                <span class="fix">{{ h.showStateButton.content }}</span>
+                            </div>
+
+                            <div class="btn normal"
+                                style="background-color:#3C9FE6;box-shadow:0 0.04rem 0.04rem 0 rgba(60,159,230, 0.15)" v-else>
                                 <span class="fix">{{ h.showStateButton.content }}</span>
                             </div>
                         </div>
                     </div>
-                    </router-link>
+                </router-link>
                 <!-- </div> -->
             </van-list>
         </div>
@@ -60,7 +67,8 @@
 
 <script>
 import MovieWish from "../../components/MovieWish.vue"
-import { getGoodMovie, getHotMovie } from "../../apis/movie"
+import { getGoodMovie, getHotMovie, getMoreHotMovie } from "../../apis/movie"
+import GoTop from "../../components/GoTop.vue"
 // getAwaitMovie
 export default {
     props: ['id'],
@@ -71,6 +79,10 @@ export default {
             hotMovieList: [],
             loading: false,
             finished: false,
+            hotMovieArr: [],
+            newHotMovieId: [],
+            count: 0,
+            str: ''
         };
     },
     mounted() {
@@ -86,8 +98,16 @@ export default {
             this.goodmovielist = movieList;
         },
         async getHotMovie() {
-            let { movieList } = await getHotMovie();
-            this.hotMovieList = movieList
+            let { movieList, movieIds } = await getHotMovie();
+            this.hotMovieList = movieList;
+            this.hotMovieArr = movieIds;
+            this.newHotMovieId = movieIds.slice(12);
+        },
+        async getMoreHotMovie() {
+            let data = await getMoreHotMovie(this.str);
+            data.coming.map(item => {
+                this.hotMovieList.push(item);
+            })
         },
         onMovie(id) {
             this.$router.push({
@@ -98,25 +118,46 @@ export default {
             })
         },
         onLoad() {
-            // 异步更新数据
+
+            let endCount = 0;
+
             // setTimeout 仅做示例，真实场景中一般为 ajax 请求
-            // setTimeout(() => {
-            //     for (let i = 0; i < 10; i++) {
-            //         this.list.push(this.list.length + 1);
-            //     }
 
-            //     // 加载状态结束
-            //     this.loading = false;
 
-            //     // 数据全部加载完成
-            //     if (this.list.length >= 40) {
-            //         this.finished = true;
-            //     }
-            // }, 1000);
+            setTimeout(() => {
+
+                if (endCount < this.newHotMovieId.length) {
+                    this.count += 10;
+                    endCount = this.count + 10;
+                }
+                if (endCount >= this.newHotMovieId.length) {
+                    endCount = this.newHotMovieId.length;
+                }
+                if(this.count > endCount){
+                    // this.count = null;
+                    // this.str = "";
+                    endCount = null;
+                }
+                // this.count = null;
+                // console.log("count",this.count);
+                // console.log("end",endCount);
+
+                this.str = String(this.newHotMovieId.slice(this.count, endCount));
+                // console.log(this.str);
+
+                this.getMoreHotMovie()
+                this.loading = false;
+
+                // 数据全部加载完成
+                if (endCount == null) {
+                    this.finished = true;
+                }
+            }, 3000);
         },
     },
     components: {
-        MovieWish
+        MovieWish,
+        GoTop
     },
 
 }
@@ -204,6 +245,7 @@ export default {
     position: relative;
     width: 100%;
     height: 114px;
+    padding-left: 15px;
 
     .avatar {
         width: 64px;
@@ -342,5 +384,8 @@ export default {
     .mb-outline-b {
         background: url(//obj.pipi.cn/festatic/touchnode/resources/images/dpmmweb/img/base/base64/repeat-x-bottom-outline.png) 0 bottom repeat-x;
     }
+}
+.van-list{
+    margin-bottom: 52px;
 }
 </style>

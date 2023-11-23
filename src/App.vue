@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <van-nav-bar class="top-nav" title="猫眼电影" @click-right="listShow = !listShow" v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails')"   @click-left="onClickLeft">
+    <van-nav-bar class="top-nav" title="猫眼电影" @click-right="listShow = !listShow" v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails' || routeName == 'ciemas')"   @click-left="onClickLeft">
       <template #left>
-        <van-icon name="arrow-left" size="20" v-if="(path == '/search')"/>
+        <van-icon name="arrow-left" size="20" v-if="(path == '/search' || routeName == 'ciemas')"/>
   </template>
       <template #right>
         <van-icon name="wap-nav" size="20" />
@@ -17,7 +17,7 @@
 
     <!-- 底部导航栏 -->
     <van-tabbar class="tabbar" route v-model="active" active-color="#f03d37" inactive-color="#696969"
-    v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails' || path == '/search')"
+    v-show="!(path == '/shortvideoplay' || path == '/city-list' || path == '/moviedetails' || path == '/search' || routeName == 'ciemas')"
     >
       <van-tabbar-item to="/" icon="home-o" title="电影/影院">电影/影院</van-tabbar-item>
       <van-tabbar-item to="/video" icon="tv-o">视频</van-tabbar-item>
@@ -45,7 +45,8 @@ export default {
   data() {
     return {
       listShow: false,
-      path:''
+      path:'',
+      routeName:'',
     };
   },
   methods: {
@@ -69,8 +70,9 @@ export default {
   },
   watch:{
     $route(to){
-      this.path = to.path
-    }
+      this.path = to.path,
+      this.routeName = to.name;
+    },
   }
 }
 </script>

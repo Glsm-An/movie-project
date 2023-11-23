@@ -27,26 +27,39 @@
                     <van-icon name="more-o" size="22" />
                     {{ commentCount }}
                 </div>
-                <van-icon name="share-o" size="22" />
+
+                    <van-icon name="share-o" size="22" @click="showShare = true"/>
+                    <van-share-sheet v-model="showShare" title="立即分享给好友" :options="options" @select="onSelect" />
+        
+
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { Toast } from 'vant';
 export default {
     data() {
         return {
             play: false,
+            showShare: false,
             totalTime: "00:00",
+            options: [
+                { name: '微信', icon: 'wechat' },
+                { name: '微博', icon: 'weibo' },
+                { name: '复制链接', icon: 'link' },
+                { name: '分享海报', icon: 'poster' },
+                { name: '二维码', icon: 'qrcode' },
+            ],
         }
     },
     props: ["id", "title", "videoSrc", "userName", "userIcon", "upCount", "commentCount", "bgImg", "currentPlayingVideo"],
     mounted() {
-     
+
     },
     methods: {
-        
+
         onplay() {
             //把正在播放的video标签方向传值
             this.$emit('onVideoPlay', this.$refs.video);
@@ -70,12 +83,16 @@ export default {
             let timeStr = m + ":" + s;
             // console.log(timeStr);
             this.totalTime = timeStr;
-            console.log(this.totalTime);
+            // console.log(this.totalTime);
             // return timeStr
-        }
+        },
+        onSelect(option) {
+            Toast(option.name);
+            this.showShare = false;
+        },
     },
     computed: {
-       
+
     },
 }
 </script>

@@ -1,0 +1,202 @@
+<template>
+  <div class="form-wrapper">
+    <div class="header">Movie Register</div>
+    <div class="input-wrapper">
+      <div class="border-wrapper">
+        <input
+          type="text"
+          name="username"
+          placeholder="请输入用户名"
+          class="border-item"
+          v-model.trim="username"
+        />
+      </div>
+      <div class="border-wrapper">
+        <input
+          type="password"
+          name="password"
+          placeholder="请输入密码"
+          class="border-item"
+          v-model.trim="psd"
+        />
+      </div>
+    </div>
+    <div class="action">
+      <div class="btn" @click="registerHandle">注册</div>
+  </div>
+     
+  </div>
+</template>
+
+<script>
+import { Dialog, Toast } from "vant";
+export default {
+  data() {
+    return {
+      username: "",
+      psd: "",
+    };
+  },
+  methods: {
+    registerHandle() {
+      if (this.username && this.psd) {
+        let users = localStorage.users || "[]";
+        users = JSON.parse(users);
+        // 用户名唯一
+        let index = users.findIndex((u) => u.username == this.username);
+
+        if (index != -1) {
+          Toast.fail("用户名已存在");
+          return;
+        }
+
+        users.push({
+          username: this.username,
+          psd: this.psd,
+        });
+
+        localStorage.users = JSON.stringify(users);
+        Toast.success("注册成功");
+
+        this.username = "";
+        this.psd = "";
+        this.$router.replace({ name: "login" });
+      }
+     
+    },
+  },
+  beforeRouteLeave(to, from, next) {
+   
+    if (this.username || this.psd) {
+
+      // setTimeout(() => {
+      //    this.$dialog.alert({
+      //   title:`表单尚未提交是否离开该页面提示(☞ﾟヮﾟ)☞`,
+      //   showCancelButton:true,
+      //   closeOnClickOverlay:true
+      // }).then(() =>{
+      //   console.log("成");
+      //   next()
+      // }).catch(() =>{
+      //   next(false)
+      //   console.log("Aa");
+      // })
+      // },100)
+      // let checked = confirm("表单尚未提交是否离开该页面");
+
+      // next(checked);
+
+      Dialog.confirm({
+        title: "表单尚未提交是否离开该页面(☞ﾟヮﾟ)☞",
+        // message: "",
+        // closeOnPopstate: false,
+      })
+        .then(() => {
+          // on confirm
+          next();
+        })
+        .catch(() => {
+          next(false);
+        });
+    }else{
+        next();
+    }
+  },
+};
+</script>
+
+<style lang="scss">
+.form-wrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(41, 45, 62, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  padding: 45px;
+}
+
+.form-wrapper .header {
+  text-align: center;
+  font-size: 30px;
+  text-transform: uppercase;
+  line-height: 100px;
+}
+
+.form-wrapper .input-wrapper input {
+  background-color: rgb(41, 45, 62);
+  border: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  color: #fff;
+  outline: none;
+}
+
+.form-wrapper .input-wrapper input::placeholder {
+  text-transform: uppercase;
+}
+
+.form-wrapper .input-wrapper .border-wrapper {
+  background-image: linear-gradient(to right, #e8198b, #0eb4dd);
+  width: 100%;
+  height: 50px;
+  margin-bottom: 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-wrapper .input-wrapper .border-wrapper .border-item {
+  height: calc(100% - 4px);
+  width: calc(100% - 4px);
+  border-radius: 30px;
+}
+
+.form-wrapper .action {
+  display: flex;
+  justify-content: center;
+}
+
+.form-wrapper .action .btn {
+  width: 60%;
+  text-transform: uppercase;
+  border: 2px solid #0e92b3;
+  text-align: center;
+  line-height: 50px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.form-wrapper .action .btn:hover {
+  background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.form-wrapper .icon-wrapper {
+  text-align: center;
+  width: 60%;
+  margin: 0 auto;
+  margin-top: 20px;
+  border-top: 1px dashed rgb(146, 146, 146);
+  padding: 20px;
+}
+
+.form-wrapper .icon-wrapper i {
+  font-size: 20px;
+  color: rgb(187, 187, 187);
+  cursor: pointer;
+  border: 1px solid #fff;
+  padding: 5px;
+  border-radius: 20px;
+}
+
+.form-wrapper .icon-wrapper i:hover {
+  background-color: #0e92b3;
+}
+// .login {
+//   color: #007dff;
+//   position: absolute;
+//   top: 80vh;
+//   right: 15px;
+// }
+</style>

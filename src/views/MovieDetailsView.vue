@@ -1,6 +1,6 @@
 <template>
     <div :style="{ backgroundColor: movie.backgroundColor }">
-        <div class="movie-info">
+        <div class="movie-info" v-show="movie">
             <!-- 标题 -->
             <div class="crumbs-nav">
                 <a href="/">猫眼电影</a>
@@ -158,7 +158,7 @@
             </div>
             <!-- 演职人员 -->
             <div class="actors">
-                <p>剧照</p>
+                <p>演职人员</p>
                 <template>
                     <el-carousel :interval="3000" type="card" indicator-position="none">
                         <el-carousel-item v-for="item in celebrities" :key="item.id">

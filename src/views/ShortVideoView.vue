@@ -1,46 +1,69 @@
 <template>
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh" style="min-height: 100vh;">
+        <GoTop/>
         <div class="short-video-box">
+            <el-backtop target=".short-video-box"></el-backtop>
+            <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
 
-            <div class="short-video-item" v-for="s in shortVideoList" :key="s.id" @click="goShortVideoPlay(s.id)"
-                :style="`background-image: url(${s.shareInfo.img});`">
-                <div class="title">{{ s.title }}</div>
+                <div class="short-video-item" v-for="s in shortVideoList" :key="s.id" @click="goShortVideoPlay(s.id)"
+                    :style="`background-image: url(${s.shareInfo.img});`">
+                    <div class="title">{{ s.title }}</div>
 
-                <div class="video-info">
-                    <div>
-                        <van-image round width="21.5px" height="21.5px" :src="s.user.avatarurl" />
-                        <div class="user-name">{{ s.user.nickName }}</div>
-                    </div>
-                    <div>
-                        <van-icon name="good-job-o" size="21.5" />
-                        <div class="up-count">{{ s.upCount }}</div>
+                    <div class="video-info">
+                        <div>
+                            <van-image round width="21.5px" height="21.5px" :src="s.user.avatarurl" />
+                            <div class="user-name">{{ s.user.nickName }}</div>
+                        </div>
+                        <div>
+                            <van-icon name="good-job-o" size="21.5" />
+                            <div class="up-count">{{ s.upCount }}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </van-list>
 
         </div>
+
     </van-pull-refresh>
 </template>
 
 <script>
 import { Toast } from 'vant';
-import { getShortVideo } from '../apis/shortVideo'
+import { getShortVideo } from '../apis/shortVideo';
+import GoTop from '../components/GoTop.vue'
 export default {
+    components: {
+        GoTop
+    },
     data() {
         return {
             shortVideoList: [],
             isLoading: false,
             timer: null,
+            loading: false,
+            finished: false,
         }
     },
     mounted() {
         this.getShortVideo();
+        window.addEventListener("scroll", this.handleScroll, true);
     },
     methods: {
         async getShortVideo() {
-            let { data } = await getShortVideo();
+            let random = Math.floor(Math.random() * 10000000) + 1;
+            let { data } = await getShortVideo(random);
             this.shortVideoList = data.feeds;
-            console.log(data.feeds);
+            // console.log(data.feeds);
+        },
+        async getShortVideos() {
+            let random = Math.floor(Math.random() * 10000000) + 1;
+            // console.log(random);
+            let { data } = await getShortVideo(random);
+            data.feeds.map(item => {
+                this.shortVideoList.push(item)
+            })
+            // this.shortVideoList.push(data.feeds)
+            console.log(this.shortVideoList);
         },
         goShortVideoPlay(id) {
             this.$router.push({
@@ -50,6 +73,23 @@ export default {
                 }
             })
         },
+        onLoad() {
+            // 异步更新数据
+            // setTimeout 仅做示例，真实场景中一般为 ajax 请求
+
+            setTimeout(async () => {
+                // let { data } = await getShortVideo();
+                // this.shortVideoList.push(data.feeds);
+                // console.log(data.feeds);
+                // console.log("加载中");
+                this.getShortVideos();
+
+                // 加载状态结束
+                this.loading = false;
+            }, 2000);
+
+
+        },
         onRefresh() {
             this.shortVideoList = "";
             this.timer = setTimeout(() => {
@@ -58,8 +98,6 @@ export default {
                 // this.getShortVideo()
                 this.$router.go(0)
             }, 1000);
-
-
         },
     },
     beforeDestroy() {

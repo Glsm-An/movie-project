@@ -7,6 +7,8 @@ import PerformsView from '../views/PerformsView.vue'
 import MyView from '../views/MyView.vue'
 import HotMovieView from '../views/MovieViewSons/HotMovieView.vue'
 import RecommendView from '../views/VideoViewSons/RecommendView.vue'
+import AuthorizationView from '../views/AuthorizationView.vue'
+import LoginView from '../views/Authorization/LoginView.vue'
 
 Vue.use(VueRouter)
 
@@ -109,10 +111,43 @@ const routes = [
     component: () => import("../views/MovieDetailsView.vue")
   },
   {
-    path:'/search',
-    name:'search',
-    component:() => import("../views/SearchView.vue")
-  }
+    path: '/search',
+    name: 'search',
+    component: () => import("../views/SearchView.vue")
+  },
+  {
+    path: '/ciemas/:id',
+    name: 'ciemas',
+    props: true,
+    component: () => import("../views/CiemasView.vue")
+  },
+  {
+    path: '/ticketing',
+    name: 'ticketing',
+    props: true,
+    component: () => import("../views/TickeTingView.vue")
+  },
+  {
+    path: '/authorization',
+    name: 'authorization',
+    component: AuthorizationView,
+    children: [
+      {
+        path: '',
+        name: 'login',
+        component: LoginView
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import("../views/Authorization/RegisterView.vue")
+      }
+    ]
+  },
+  // {
+  //   path:'/',
+  //   redirect: '/movie'
+  // }
 ]
 
 const router = new VueRouter({
@@ -121,4 +156,29 @@ const router = new VueRouter({
   routes
 })
 
+router.beforeEach((to, from, next) => {
+  const { name } = to
+  if (name == 'my') {
+    // 根据token是否存在做登录验证
+    let token = localStorage.token;
+
+    if (!token) {
+      //未登录
+      next({ name: 'login', params: to })
+
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
+})
+
+
+//解决路由守卫抛出异常问题
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch(err => err)
+}
 export default router
