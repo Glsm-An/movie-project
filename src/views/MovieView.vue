@@ -73,7 +73,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .home-screen {
     height: 44px;
     border-bottom: 2px solid #e6e6e6;
@@ -88,6 +88,7 @@ export default {
     align-items: center;
 
     .city {
+        font-size: 18px;
         white-space: nowrap;
     }
 
@@ -106,11 +107,14 @@ export default {
 
     .van-tab__text {
         // min-width: 58px;
-        font-weight: 700;
+        font-weight: 500 !important;
     }
 
     .van-tabs__line {
         background-color: #f03d37;
     }
+    // .van-tab--active{
+    //     font-weight: 700 !important;
+    // }
 }
 </style>

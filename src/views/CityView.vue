@@ -58,7 +58,7 @@ export default {
         //获取最近访问城市列表
         this.getHistoryCity();
         // this.cityHandle();
-        // this.dingwei();
+        this.dingwei();
         this.IPdingwei();
     },
     methods: {
@@ -175,24 +175,24 @@ export default {
             cityObj = JSON.parse(cityObj);
             this.cityObj = cityObj;
         },
-        // dingwei() {
-        //     var point = new window.BMapGL.Point(116.331398, 39.897445);
-        //     var map = new window.BMapGL.Map("container");
-        //     map.centerAndZoom(point, 12);
+        dingwei() {
+            var point = new window.BMapGL.Point(116.331398, 39.897445);
+            var map = new window.BMapGL.Map("container");
+            map.centerAndZoom(point, 12);
 
-        //     var geolocation = new window.BMapGL.Geolocation();
-        //     geolocation.getCurrentPosition(function (r) {
-        //         if (this.getStatus() == window.BMAP_STATUS_SUCCESS) {
-        //             var mk = new window.BMapGL.Marker(r.point);
-        //             map.addOverlay(mk);
-        //             map.panTo(r.point);
-        //             console.log('您的位置：' + r.point.lng + ',' + r.point.lat);
-        //         }
-        //         else {
-        //             alert('错误信息' + this.getStatus());
-        //         }
-        //     });
-        // },
+            var geolocation = new window.BMapGL.Geolocation();
+            geolocation.getCurrentPosition(function (r) {
+                if (this.getStatus() == window.BMAP_STATUS_SUCCESS) {
+                    var mk = new window.BMapGL.Marker(r.point);
+                    map.addOverlay(mk);
+                    map.panTo(r.point);
+                    console.log('您的位置：' + r.point.lng + ',' + r.point.lat);
+                }
+                else {
+                    alert('错误信息' + this.getStatus());
+                }
+            });
+        },
         //使用IP定位(速度更快)
         IPdingwei() {
             let _this = this;
@@ -230,7 +230,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .van-cell {
     background-color: #f5f5f5;
     border-bottom: 1px solid #ccc;

@@ -6,7 +6,7 @@
         class="top-nav"
         :title="ciemasName"
         @click-right="listShow = !listShow"
-        @click-left="$router.go(-1)"
+        @click-left="$router.go(-1);"
       >
         <template #left>
           <van-icon name="arrow-left" size="20" />
@@ -132,11 +132,11 @@
               <div class="vipPrice" v-show="s.vipPrice">
                 <span class="icon">{{ s.vipPriceNameNew }}</span>
                 <span class="num"
-                  >￥{{ s.vipPrice > 0 ? s.vipPrice * 0.9 : 35 * 0.9 }}</span
+                  >￥{{ s.vipPrice > 0 ?  (s.vipPrice * 0.9).toFixed(1) : (35 * 0.9).toFixed(1) }}</span
                 >
               </div>
             </div>
-            <div class="button-block" @click="goBuyMovie">
+            <div class="button-block" @click="goBuyMovie(index)">
               <div class="button">购票</div>
             </div>
           </div>
@@ -183,6 +183,9 @@ export default {
       vipInfo: "",
       //当日电影档期
       plist: [],
+      //日期
+      cdate: "",
+      cmd: "",
     };
   },
   mounted() {
@@ -212,7 +215,9 @@ export default {
       this.ciemasData = data;
       this.vipInfo = data.vipInfo ? data.vipInfo[0] : "";
       this.plist = data.movies[0].shows[0].plist;
-      // console.log(data);
+      this.cdate = this.day[0].times;
+      this.cmd = this.day[0].md;
+      console.log(data);
     },
     setAttr() {},
     getWidth() {
@@ -244,6 +249,8 @@ export default {
       this.shows = this.movies[this.activeIndex].shows;
       this.navIndex = 0;
       this.plist = this.movies[this.activeIndex].shows[this.navIndex].plist;
+      this.cdate = this.day[this.activeIndex]?.times;
+      this.cmd = this.day[this.activeIndex]?.md;
       //   this.vipInfo = this.ciemasData.vipInfo[i];
       // console.log(this.wish);
       // console.log(i);
@@ -275,12 +282,24 @@ export default {
         // console.log(this.navIndex);
       }
     },
-    goBuyMovie(){
+    goBuyMovie(i) {
       this.$router.push({
-        name:'ticketing',
-
-      })
-    }
+        name: "ticketing",
+        params: {
+          ciemasName: this.ciemasName,
+          title: this.title,
+          cdate: this.cdate,
+          cmd: this.cmd,
+          lang: this.plist[i].lang,
+          th: this.plist[i].tp,
+          index: i,
+          price: this.plist[i].vipPrice ? this.plist[i].vipPrice:35 ,
+          startTime: this.plist[i].tm,
+          endTime: this.breakTime[i],
+          bgImg:this.bgImg,
+        },
+      });
+    },
   },
   computed: {
     day() {
@@ -342,11 +361,11 @@ export default {
           minute < 10 ? "0" + minute : minute
         }`;
         // let hour = movieEnd.getHours();
-       endTimeArr.push(endTimeStr)
+        endTimeArr.push(endTimeStr);
         // endTimeStr = hour
       });
       // console.log(endTimeStr);
-      
+
       return endTimeArr;
     },
   },
@@ -360,13 +379,14 @@ export default {
         this.navIndex = 0;
         this.vipInfo = "";
         this.plist = [];
+        this.$refs.swiper.style.transform = `translate3d(162.5px,0px,0px)`;
       },
     },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .top-nav {
   background-color: var(--bgColor);
 
@@ -503,6 +523,7 @@ export default {
   height: 95px;
   margin-left: 15px;
   box-sizing: initial;
+
   .active {
     transform: scale(1.15);
     border: 2px solid #fff;

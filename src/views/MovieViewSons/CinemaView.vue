@@ -393,7 +393,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .van-dropdown-menu__title {
     font-size: 13px;
     max-width: 92px;

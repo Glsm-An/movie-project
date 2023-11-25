@@ -108,7 +108,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .short-video-box {
     margin-bottom: 48px;
 }

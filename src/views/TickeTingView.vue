@@ -1,1552 +1,593 @@
 <template>
-  <div>
-    <div class="title">{{ cinemaInfo.movieName }}</div>
-    <div class="titleInfo">
-      <div>{{ cinemaInfo.showTime }}</div>
-      <div>{{ cinemaInfo.name }}</div>
-    </div>
-    <div class="centerInfo">
-      <div class="centerInfo2">
-        <span>{{ cinemaInfo.seatTypeList[0].name }}</span>
-        <img style="width: 20px" :src="cinemaInfo.seatTypeList[0].icon" />
+  <div class="buy-box">
+    <!-- 头部导航栏 -->
+    <van-nav-bar class="top-nav" :title="ciemasName" @click-left="onClickLeft">
+      <template #left>
+        <van-icon name="arrow-left" size="20" />
+      </template>
+    </van-nav-bar>
+    <!-- 头部导航栏结束 -->
+    <!-- 排期详情和座位上方示例图 开始 -->
+    <div>
+      <p class="movie-title">{{ title }}</p>
+      <!-- 排期详情 -->
+      <div class="plan-detail">
+        <div class="plan-detail-item">{{ cmd }} {{ cdate }}</div>
+        <div class="plan-detail-item">{{ startTime }}-{{ endTime }}</div>
+        <div class="plan-detail-item">{{ lang }} {{ th }}</div>
       </div>
-      <div class="centerInfo2">
-        <span>{{ cinemaInfo.seatTypeList[1].name }}</span>
-        <img style="width: 20px" :src="cinemaInfo.seatTypeList[1].icon" />
-      </div>
-      <div class="centerInfo2">
-        <span>{{ cinemaInfo.seatTypeList[2].name }}</span>
-        <img style="width: 20px" :src="cinemaInfo.seatTypeList[2].icon" />
-      </div>
-      <div class="centerInfo2">
-        <span>{{ cinemaInfo.seatTypeList[3].name }}</span>
-        <img style="width: 20px" :src="cinemaInfo.seatTypeList[3].icon" />
-      </div>
-    </div>
-    <div class="screen">
-      <div class="screen-text">屏幕方向</div>
-    </div>
-    <div class="box">
-      <div
-        v-for="(seatItem, index) in cinemaInfo.seatList"
-        class="seatClass"
-        :key="seatItem.id"
-        @click="clickzuowei(seatItem)"
-        :style="{
-          height: height + 'rem',
-          width: width + 'rem',
-          top: seatItem.gRow * positionDistin + 'rem',
-          left: seatItem.gCol * positionDistin + 'rem',
-        }"
-      >
-        <img
-          class="seatImgClass"
-          :seatId="seatItem.id"
-          :seatIndex="index"
-          :src="cinemaInfo.seatTypeList[seatItem.type].icon"
-        />
+      <!-- 座位示例图 -->
+      <div class="seat-detail">
+        <div
+          v-show="s.isShow === '1' && s.position === 'up'"
+          v-for="(s, index) in seatTypeList"
+          :key="index"
+          class="seat-detail-item"
+        >
+          <img :src="s.icon" class="seatTypeClass" />
+          <span class="seatTypeClass">{{ s.name }}</span>
+        </div>
       </div>
     </div>
-    <div class="btn" @click="ok">确 认 选 座</div>
+    <!--排期详情和座位上方示例图 结束-->
+    <seat-area
+      :propThumbnailAreaWidth="thumbnailBoxWidth"
+      :propThumbnailAreaHeight="thumbnailBoxHeight"
+      :propYMax="yMax"
+      :propSeatScale="seatScale"
+      :propSeatHeight="positionDistin"
+      :propSeatToolArr="seatToolArr"
+      :propSeatAreaWidthRem="seatAreaWidthRem"
+      :propSeatAreaHeightRem="seatAreaHeightRem"
+      :propSeatBoxHeight="seatBoxHeight"
+      :propMiddleLine="middleLine"
+      :propHorizontalLine="horizontalLine"
+      ref="seatArea"
+    >
+      <!--以下为缩略座位图具名插槽 开始-->
+      <template slot="thumbnail-seat-solt">
+        <template v-for="seatItem in seatList">
+          <div
+            class="thumbnailSeatClass"
+            :key="'thumbnail' + seatItem.id"
+            :style="{
+              height: thumbnailHeight + 'rem',
+              width: thumbnailWidth + 'rem',
+              background: thumbnailBackgroud(seatItem),
+              top: seatItem.gRow * thumbnailPositionDistin + 'rem',
+              left: seatItem.gCol * thumbnailPositionDistin + 'rem',
+            }"
+          ></div>
+        </template>
+      </template>
+      <!--以上为缩略座位图具名插槽 结束-->
+      <!--以下为座位图具名插槽 开始-->
+      <template slot="seat-area-solt">
+        <div
+          class="seatBox"
+          :style="{
+            transform: 'scale(' + seatScale + ')',
+            height: seatBoxHeight + 'rem',
+            width: seatBoxWidth + 'rem',
+            marginLeft: seatBoxCenterMargin + 'rem',
+          }"
+        >
+          <!--中轴线-->
+          <div
+            v-show="seatList.length > 0"
+            class="middle-line"
+            :style="{ height: seatBoxHeight + 'rem', left: middleLine + 'rem' }"
+          ></div>
+          <template v-for="(seatItem, index) in seatList">
+            <div
+              class="seatClass"
+              @click.prevent="clickSeat(index)"
+              :key="seatItem.id"
+              :style="{
+                height: (height/2) + 'rem',
+                width: (width/2) + 'rem',
+                top: (seatItem.gRow * positionDistin)/2 + 'rem',
+                left: (seatItem.gCol * positionDistin)/2 + 'rem',
+              }"
+            >
+              <img
+                class="seatImgClass"
+                :seatId="seatItem.id"
+                :seatIndex="index"
+                :src="seatItem.nowIcon"
+              />
+            </div>
+          </template>
+        </div>
+      </template>
+      <!--以上为座位图具名插槽 结束-->
+    </seat-area>
+    <!-- 失活的组件将会被缓存！-->
+    <keep-alive>
+      <component
+        v-bind:is="selectedTabComponents"
+        :propSeatList="seatList"
+        :propSelectedSeat="selectedSeatList"
+        :moviePrice="price"
+        @quickSelect="processUnSelected"
+        @cancelSelect="processSelected"
+      ></component>
+    </keep-alive>
+    <confirm-lock
+      :propSelectedSeat="selectedSeatList"
+      :propSeatList="seatList"
+      :price="price"
+      :title="title"
+      :bgImg="bgImg"
+      :cdate="cdate"
+      :cmd="cmd"
+      :startTime="startTime"
+      :endTime="endTime"
+    ></confirm-lock>
   </div>
 </template>
 
+
 <script>
+import SeatArea from "./SeatSelection/SeatArea.vue";
+import ConfirmLock from "./SeatSelection/ConfirmLock.vue";
+import QuickSelectTab from "./SeatSelection/QuickSelectTab.vue";
+import SelectedTab from "./SeatSelection/SelectedTab.vue";
+import { Toast } from "vant";
+
 export default {
+  props: [
+    "ciemasName",
+    "title",
+    "cdate",
+    "cmd",
+    "lang",
+    "th",
+    "index",
+    "price",
+    "startTime",
+    "endTime",
+    "bgImg",
+  ],
   data() {
     return {
-      //影院 厅信息
-      cinemaInfo: {
-        errorCode: 0,
-        errorMsg: "",
-        name: "4号厅",
-        movieName: "白蛇传之白蛇缘起",
-        showTime: "2019-03-06 周五 16:50",
-        cinema_name: "惊奇队长影院",
-        //座位信息
-        seatList: [
-          {
-            //座位id
-            id: "16879097",
-            //座位X轴实际位置，去掉过道
-            row: "1",
-            //座位Y轴实际位置，去掉过道
-            col: "1",
-            //座位X轴位置
-            gRow: 1,
-            //座位Y轴位置
-            gCol: 4,
-            //类型：区分座位状态，详情看seatTypeList数组，按0,1,2顺序下去代表不同状态，切换图片
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879101",
-            row: "1",
-            col: "4",
-            gRow: 1,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879104",
-            row: "1",
-            col: "7",
-            gRow: 1,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879099",
-            row: "1",
-            col: "2",
-            gRow: 1,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879102",
-            row: "1",
-            col: "5",
-            gRow: 1,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879105",
-            row: "1",
-            col: "8",
-            gRow: 1,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879100",
-            row: "1",
-            col: "3",
-            gRow: 1,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879103",
-            row: "1",
-            col: "6",
-            gRow: 1,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879107",
-            row: "1",
-            col: "9",
-            gRow: 1,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879113",
-            row: "2",
-            col: "1",
-            gRow: 2,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879117",
-            row: "2",
-            col: "4",
-            gRow: 2,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879120",
-            row: "2",
-            col: "7",
-            gRow: 2,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879124",
-            row: "2",
-            col: "10",
-            gRow: 2,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879114",
-            row: "2",
-            col: "2",
-            gRow: 2,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879118",
-            row: "2",
-            col: "5",
-            gRow: 2,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879121",
-            row: "2",
-            col: "8",
-            gRow: 2,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879125",
-            row: "2",
-            col: "11",
-            gRow: 2,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879116",
-            row: "2",
-            col: "3",
-            gRow: 2,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879119",
-            row: "2",
-            col: "6",
-            gRow: 2,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879122",
-            row: "2",
-            col: "9",
-            gRow: 2,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879142",
-            row: "3",
-            col: "13",
-            gRow: 3,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879129",
-            row: "3",
-            col: "2",
-            gRow: 3,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879133",
-            row: "3",
-            col: "5",
-            gRow: 3,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879136",
-            row: "3",
-            col: "8",
-            gRow: 3,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879139",
-            row: "3",
-            col: "11",
-            gRow: 3,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879143",
-            row: "3",
-            col: "14",
-            gRow: 3,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879130",
-            row: "3",
-            col: "3",
-            gRow: 3,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879134",
-            row: "3",
-            col: "6",
-            gRow: 3,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879137",
-            row: "3",
-            col: "9",
-            gRow: 3,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879141",
-            row: "3",
-            col: "12",
-            gRow: 3,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879144",
-            row: "3",
-            col: "15",
-            gRow: 3,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879128",
-            row: "3",
-            col: "1",
-            gRow: 3,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879131",
-            row: "3",
-            col: "4",
-            gRow: 3,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879135",
-            row: "3",
-            col: "7",
-            gRow: 3,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879138",
-            row: "3",
-            col: "10",
-            gRow: 3,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879154",
-            row: "4",
-            col: "9",
-            gRow: 4,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879145",
-            row: "4",
-            col: "1",
-            gRow: 4,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879158",
-            row: "4",
-            col: "12",
-            gRow: 4,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879148",
-            row: "4",
-            col: "4",
-            gRow: 4,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879161",
-            row: "4",
-            col: "15",
-            gRow: 4,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879152",
-            row: "4",
-            col: "7",
-            gRow: 4,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879155",
-            row: "4",
-            col: "10",
-            gRow: 4,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879146",
-            row: "4",
-            col: "2",
-            gRow: 4,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879159",
-            row: "4",
-            col: "13",
-            gRow: 4,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879150",
-            row: "4",
-            col: "5",
-            gRow: 4,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879153",
-            row: "4",
-            col: "8",
-            gRow: 4,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879156",
-            row: "4",
-            col: "11",
-            gRow: 4,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879147",
-            row: "4",
-            col: "3",
-            gRow: 4,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879160",
-            row: "4",
-            col: "14",
-            gRow: 4,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879151",
-            row: "4",
-            col: "6",
-            gRow: 4,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879164",
-            row: "5",
-            col: "3",
-            gRow: 5,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879168",
-            row: "5",
-            col: "6",
-            gRow: 5,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879171",
-            row: "5",
-            col: "9",
-            gRow: 5,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879175",
-            row: "5",
-            col: "12",
-            gRow: 5,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879178",
-            row: "5",
-            col: "15",
-            gRow: 5,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879162",
-            row: "5",
-            col: "1",
-            gRow: 5,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879165",
-            row: "5",
-            col: "4",
-            gRow: 5,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879169",
-            row: "5",
-            col: "7",
-            gRow: 5,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879172",
-            row: "5",
-            col: "10",
-            gRow: 5,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879176",
-            row: "5",
-            col: "13",
-            gRow: 5,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879163",
-            row: "5",
-            col: "2",
-            gRow: 5,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879167",
-            row: "5",
-            col: "5",
-            gRow: 5,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879170",
-            row: "5",
-            col: "8",
-            gRow: 5,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879173",
-            row: "5",
-            col: "11",
-            gRow: 5,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879177",
-            row: "5",
-            col: "14",
-            gRow: 5,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879207",
-            row: "6",
-            col: "11",
-            gRow: 7,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879211",
-            row: "6",
-            col: "14",
-            gRow: 7,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879198",
-            row: "6",
-            col: "3",
-            gRow: 7,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879202",
-            row: "6",
-            col: "6",
-            gRow: 7,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879205",
-            row: "6",
-            col: "9",
-            gRow: 7,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879209",
-            row: "6",
-            col: "12",
-            gRow: 7,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879212",
-            row: "6",
-            col: "15",
-            gRow: 7,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879196",
-            row: "6",
-            col: "1",
-            gRow: 7,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879199",
-            row: "6",
-            col: "4",
-            gRow: 7,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879203",
-            row: "6",
-            col: "7",
-            gRow: 7,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879206",
-            row: "6",
-            col: "10",
-            gRow: 7,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879210",
-            row: "6",
-            col: "13",
-            gRow: 7,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879197",
-            row: "6",
-            col: "2",
-            gRow: 7,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879201",
-            row: "6",
-            col: "5",
-            gRow: 7,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879204",
-            row: "6",
-            col: "8",
-            gRow: 7,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879220",
-            row: "7",
-            col: "7",
-            gRow: 8,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879223",
-            row: "7",
-            col: "10",
-            gRow: 8,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879214",
-            row: "7",
-            col: "2",
-            gRow: 8,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879227",
-            row: "7",
-            col: "13",
-            gRow: 8,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879218",
-            row: "7",
-            col: "5",
-            gRow: 8,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879221",
-            row: "7",
-            col: "8",
-            gRow: 8,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879224",
-            row: "7",
-            col: "11",
-            gRow: 8,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879215",
-            row: "7",
-            col: "3",
-            gRow: 8,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879228",
-            row: "7",
-            col: "14",
-            gRow: 8,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879219",
-            row: "7",
-            col: "6",
-            gRow: 8,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879222",
-            row: "7",
-            col: "9",
-            gRow: 8,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879213",
-            row: "7",
-            col: "1",
-            gRow: 8,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879226",
-            row: "7",
-            col: "12",
-            gRow: 8,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879216",
-            row: "7",
-            col: "4",
-            gRow: 8,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879229",
-            row: "7",
-            col: "15",
-            gRow: 8,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879230",
-            row: "8",
-            col: "1",
-            gRow: 9,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879233",
-            row: "8",
-            col: "4",
-            gRow: 9,
-            gCol: 4,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879237",
-            row: "8",
-            col: "7",
-            gRow: 9,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879240",
-            row: "8",
-            col: "10",
-            gRow: 9,
-            gCol: 11,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879244",
-            row: "8",
-            col: "13",
-            gRow: 9,
-            gCol: 15,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879231",
-            row: "8",
-            col: "2",
-            gRow: 9,
-            gCol: 2,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879235",
-            row: "8",
-            col: "5",
-            gRow: 9,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879238",
-            row: "8",
-            col: "8",
-            gRow: 9,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879241",
-            row: "8",
-            col: "11",
-            gRow: 9,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879245",
-            row: "8",
-            col: "14",
-            gRow: 9,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879232",
-            row: "8",
-            col: "3",
-            gRow: 9,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879236",
-            row: "8",
-            col: "6",
-            gRow: 9,
-            gCol: 7,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879239",
-            row: "8",
-            col: "9",
-            gRow: 9,
-            gCol: 10,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879243",
-            row: "8",
-            col: "12",
-            gRow: 9,
-            gCol: 14,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879246",
-            row: "8",
-            col: "15",
-            gRow: 9,
-            gCol: 17,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879256",
-            row: "9",
-            col: "9",
-            gRow: 10,
-            gCol: 10,
-            type: "3",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879260",
-            row: "9",
-            col: "12",
-            gRow: 10,
-            gCol: 14,
-            type: "3",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879263",
-            row: "9",
-            col: "15",
-            gRow: 10,
-            gCol: 17,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879247",
-            row: "9",
-            col: "1",
-            gRow: 10,
-            gCol: 1,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879250",
-            row: "9",
-            col: "4",
-            gRow: 10,
-            gCol: 4,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879254",
-            row: "9",
-            col: "7",
-            gRow: 10,
-            gCol: 8,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879257",
-            row: "9",
-            col: "10",
-            gRow: 10,
-            gCol: 11,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879261",
-            row: "9",
-            col: "13",
-            gRow: 10,
-            gCol: 15,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879248",
-            row: "9",
-            col: "2",
-            gRow: 10,
-            gCol: 2,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879252",
-            row: "9",
-            col: "5",
-            gRow: 10,
-            gCol: 6,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879255",
-            row: "9",
-            col: "8",
-            gRow: 10,
-            gCol: 9,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879258",
-            row: "9",
-            col: "11",
-            gRow: 10,
-            gCol: 12,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879262",
-            row: "9",
-            col: "14",
-            gRow: 10,
-            gCol: 16,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879249",
-            row: "9",
-            col: "3",
-            gRow: 10,
-            gCol: 3,
-            type: "0",
-            flag: "0",
-            price: "69",
-          },
-          {
-            id: "16879253",
-            row: "9",
-            col: "6",
-            gRow: 10,
-            gCol: 7,
-            type: "2",
-            flag: "0",
-            price: "69",
-          },
-        ],
-        seatTypeList: [
-          {
-            name: "可选",
-            type: "0",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/903ea73657465071afc936a1129765c3584.png",
-            isShow: "1",
-            position: "up",
-          },
-          {
-            name: "已选",
-            type: "0-1",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "1",
-            position: "up",
-          },
-          {
-            name: "已售",
-            type: "0-2",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "1",
-            position: "up",
-          },
-          {
-            name: "维修",
-            type: "0-3",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "1",
-            position: "up",
-          },
-          {
-            name: "情侣首座可选",
-            type: "1",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣首座已选",
-            type: "1-1",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣首座已售",
-            type: "1-2",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣首座维修",
-            type: "1-3",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣次座可选",
-            type: "2",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣次座已选",
-            type: "2-1",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣次座已售",
-            type: "2-2",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣次座维修",
-            type: "2-3",
-            seats: 1,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "0",
-            position: "up",
-          },
-          {
-            name: "情侣座",
-            type: "5",
-            seats: 2,
-            icon: "http://p0.meituan.net/moviemachine/2976af246e5fab4f72c52fac9f20ba521398.png",
-            isShow: "1",
-            position: "up",
-          },
-        ],
-      },
-      width: 1.4, // 每个座位的宽
-      height: 1.4, // 每个座位的高
-      positionDistin: 1.1, // 每个座位偏移距离
+      seatList: [], // 座位对象list
+      seatTypeList: [], // 座位类型list
+      // movieName: "", // 展示用 电影名称 接口获取
+      // hallName: "", // 展示用 影厅名称 接口获取
+      // showDate: "", // 展示用 开始日期 接口获取
+      // showTime: "", // 展示用 开始时间 接口获取
+      positionDistin: 0.5, // 每个座位偏移距离
+      width: 0.5, // 每个座位的宽
+      height: 0.5, // 每个座位的高
+      thumbnailWidth: 0.1, // 缩略图每个座位的宽
+      thumbnailHeight: 0.1, // 缩略图每个座位的高
+      thumbnailPositionDistin: 0.15, // 缩略图每个座位偏移距离
+      seatAreaWidthRem: 10, // 座位区域横向rem最大值 用于和 seatAreaHeightRem 共同计算区域缩放比例
+      selectedSeatList: [], // 已选择座位
+      maxSelect: 4, // 最大选择座位数量 改动可改变最大选择座位数
+      load: false, // 加载dom的控制
     };
   },
+  components: {
+    SeatArea,
+    ConfirmLock,
+    QuickSelectTab,
+    SelectedTab,
+  },
+  mounted() {
+    this.getSeatList();
+  },
   methods: {
-    //点击座位的时候切换图片。
-    clickzuowei(val) {
-      console.log(val, "座位信息");
-      //循环影厅内座位信息
-      this.cinemaInfo.seatList.forEach((item) => {
-        //判断：选中座位和数组内的id是否一致
-        if (item.id == val.id) {
-          //一致就判断他的状态是不是0,0代表未选中，如果是未选中，那就改为1,1就是选中状态。
-          if (item.type == 0) {
-            item.type = 1;
-            //如果状态是1，也就是已经选中的状态，点击就会变成未选中
-          } else if (item.type == 1) {
-            item.type = 0;
-            //如果状态2，也就是已经出售的座位，就提示从新选座
-          } else if (item.type == 2) {
-            alert("此座位已出售，请从新选座");
-            //如果状态3，代表座位损坏，也是提示维修中。
-          } else if (item.type == 3) {
-            alert("此座位损坏，正在维修中！");
+    onClickLeft() {
+      this.$router.go(-1);
+    },
+    //获取影院列表数据
+    getSeatList() {
+      this.$get("/mock/seatLove.json").then(
+        (data) => {
+          // console.log("huoq", data);
+          let resSeatList = data.seatList;
+          //处理座位信息 ---开始
+          if (!resSeatList) {
+            return;
+          }
+          resSeatList.map((item) => {
+            // 获取座位的类型的首字母
+            let firstNumber = item.type.substr(0, 1);
+            // 在原来的对象中加入两个属性  otherLoveSeatIndex 对应情侣座位的原数组下标 otherLoveSeatId  对应情侣座位的Id
+            item.otherLoveSeatIndex = null;
+            item.otherLoveSeatId = null;
+            // 座位的类型的首字母为 '1' 是情侣首座 处理情侣首座位
+            if (firstNumber === "1") {
+              for (const index in resSeatList) {
+                if (
+                  resSeatList[index].gRow === item.gRow &&
+                  resSeatList[index].gCol === item.gCol + 1
+                ) {
+                  item.otherLoveSeatIndex = index;
+                  item.otherLoveSeatId = resSeatList[index].id;
+                }
+              }
+            }
+            // 座位的类型的首字母为 '2' 是情侣次座 处理情侣次座位
+            if (firstNumber === "2") {
+              for (const index in resSeatList) {
+                if (
+                  resSeatList[index].gRow === item.gRow &&
+                  resSeatList[index].gCol === item.gCol - 1
+                ) {
+                  item.otherLoveSeatIndex = index;
+                  item.otherLoveSeatId = resSeatList[index].id;
+                }
+              }
+            }
+            //加载座位图标
+            for (const t of data.seatTypeList) {
+              // 加载每个座位的初始图标defautIcon 和 当前图标 nowIcon
+              if (item.type === t.type) {
+                item.nowIcon = t.icon;
+                item.defautIcon = t.icon;
+              }
+              // 根据首字母找到对应的被选中图标
+              if (firstNumber + "-1" === t.type) {
+                item.selectedIcon = t.icon;
+              }
+              //根据首字母找到对应的被选中图标
+              if (firstNumber + "-2" === t.type) {
+                item.soldedIcon = t.icon;
+              }
+              //根据首字母找到对应的被选中图标
+              if (firstNumber + "-3" === t.type) {
+                item.fixIcon = t.icon;
+              }
+            }
+            // 如果座位是已经售出 和 维修座位 加入属性canClick 判断座位是否可以点击
+            if (
+              item.defautIcon === item.soldedIcon ||
+              item.defautIcon === item.fixIcon
+            ) {
+              item.canClick = false;
+            } else {
+              item.canClick = true;
+            }
+          });
+          // 座位处理 -------结束
+          // 开始处理上方影片信息显示数据
+          // let temp = data.showTime;
+          // if (temp.length === 19) {
+          //   this.showDate =
+          //     temp.substring(0, 10) + "(" + temp.substring(11, 13) + ")";
+          //   this.showTime = temp.substring(14, 19);
+          // }
+          this.seatList = resSeatList;
+          this.seatTypeList = data.seatTypeList;
+          // this.movieName = response.movieName;
+          // this.hallName = response.name;
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    },
+    //点击每个座位触发的函数
+    clickSeat(index) {
+      if (this.seatList[index].canClick) {
+        if (
+          this.seatList[index].nowIcon === this.seatList[index].selectedIcon
+        ) {
+          //触发已选座位的方法
+          this.processSelected(index);
+        } else {
+          this.processUnSelected(index);
+          // console.log(this.selectedSeatList);
+        }
+      }
+    },
+    // 处理已选的座位
+    processSelected(index) {
+      let _selectedSeatList = this.selectedSeatList;
+      let otherLoveSeatIndex = this.seatList[index].otherLoveSeatIndex;
+      if (otherLoveSeatIndex !== null) {
+        //如果是情侣座位
+        //改变这些座位的图标为初始图标
+        this.$set(
+          this.seatList[index],
+          "nowIcon",
+          this.seatList[index].defautIcon
+        );
+        this.$set(
+          this.seatList[otherLoveSeatIndex],
+          "nowIcon",
+          this.seatList[otherLoveSeatIndex].defautIcon
+        );
+        for (const key in _selectedSeatList) {
+          //移出ID一样的座位
+          if (_selectedSeatList[key].id === this.seatList[index].id) {
+            _selectedSeatList.splice(key, 1);
           }
         }
-      });
-    },
-    //确认选座
-    ok() {
-      //筛选出选择的座位
-      let info = this.cinemaInfo.seatList.filter((item) => {
-        return item.type == 1;
-      });
-      let list = [];
-      //筛选出选择的座位排和列
-      info.forEach((item) => {
-        list.push(item.row + " 排 " + item.col + " 座 ");
-      });
-      console.log("选中的座位信息:", info);
-      //有选中的时候显示选中信息和确认购买。没有选中的时候提醒先选座
-      if (info.length == 0) {
-        alert("请先选择座位，再确认购买！");
+        //移出对应情侣座位
+        for (const key in _selectedSeatList) {
+          if (
+            _selectedSeatList[key].id === this.seatList[otherLoveSeatIndex].id
+          ) {
+            _selectedSeatList.splice(key, 1);
+          }
+        }
       } else {
-        alert("当前选中座位:" + list.toString());
+        //改变这些座位的图标为初始图标 并 移除id一样的座位
+        this.$set(
+          this.seatList[index],
+          "nowIcon",
+          this.seatList[index].defautIcon
+        );
+        for (const key in _selectedSeatList) {
+          if (_selectedSeatList[key].id === this.seatList[index].id) {
+            _selectedSeatList.splice(key, 1);
+          }
+        }
       }
+    },
+    //处理未选择的座位
+    processUnSelected(index) {
+      // 如果是选择第一个座位 放大区域并移动区域 突出座位 增加用户体验
+      if (this.selectedSeatList.length === 0) {
+        let top = ((this.seatList[index].gRow * this.positionDistin) - this.horizontalLine) * this.seatScale
+        let left = ((this.seatList[index].gCol * this.positionDistin) - this.middleLine) * this.seatScale
+        top = top > 0 ? -top - this.positionDistin : -top + this.positionDistin
+        left = left > 0 ? -left - this.positionDistin : -left + this.positionDistin
+        this.$refs.seatArea.changeScale()
+        this.$refs.seatArea.changePosition(top, left)
+      }
+      let _selectedSeatList = this.selectedSeatList;
+      let otherLoveSeatIndex = this.seatList[index].otherLoveSeatIndex;
+      if (otherLoveSeatIndex !== null) {
+        //如果选中的是情侣座位 判断选择个数不大于 maxSelect
+        if (_selectedSeatList.length >= this.maxSelect - 1) {
+          Toast(`最多只能选择${this.maxSelect}个座位哦~`);
+          return;
+        }
+        //改变这些座位的图标为已选择图标
+        this.$set(
+          this.seatList[index],
+          "nowIcon",
+          this.seatList[index].selectedIcon
+        );
+        this.$set(
+          this.seatList[otherLoveSeatIndex],
+          "nowIcon",
+          this.seatList[otherLoveSeatIndex].selectedIcon
+        );
+        //记录 orgIndex属性 是原seatList数组中的下标
+        this.seatList[index].orgIndex = index;
+        this.seatList[otherLoveSeatIndex].orgIndex = otherLoveSeatIndex;
+         // 把选择的座位放入到已选座位数组中
+        _selectedSeatList.push(this.seatList[index])
+        _selectedSeatList.push(this.seatList[otherLoveSeatIndex])
+      } else {
+        //如果选中的是非情侣座位 判断选择个数不大于maxSelect
+        if (_selectedSeatList.length >= this.maxSelect) {
+          Toast(`最多只能选择${this.maxSelect}个座位哦~`);
+          return;
+        }
+        //改变这些座位的图标为已选择图标
+        this.$set(
+          this.seatList[index],
+          "nowIcon",
+          this.seatList[index].selectedIcon
+        );
+        //记录 orgIndex属性 是原seatList数组中的下标值
+        this.seatList[index].orgIndex = index;
+        //把选择的座位放入已选座位数组中
+        _selectedSeatList.push(this.seatList[index]);
+      }
+    },
+    thumbnailBackgroud(seatItem) {
+      if (seatItem.nowIcon === seatItem.selectedIcon) {
+        return "green";
+      } else if (seatItem.nowIcon === seatItem.soldedIcon) {
+        return "red";
+      } else if (seatItem.nowIcon === seatItem.fixIcon) {
+        return "red";
+      } else {
+        return "white";
+      }
+    },
+  },
+  computed: {
+    // 座位区域高度rem
+    seatAreaHeightRem() {
+      let screenRem =
+        (document.body.clientWidth ||
+          window.innerWidth ||
+          document.documentElement.clientWidth) / 10;
+      let height =
+        document.documentElement.clientHeight ||
+        window.innerHeight ||
+        document.body.clientHeight;
+      //除开座位区域的大小
+      // let otherDom = 1.08 + 1.2 + 1.2 + 0.67 + 1.87 + 1.2; // 头+排期信息+座位示例+屏幕方向区域+底部快捷选择+确认按钮
+      let otherDom = 0.504 + 0.6 + 0.6 + 0.335 + 0.935 + 0.6;
+      // 剩下的座位区域的大小
+      return height / screenRem - otherDom;
+    },
+    //取最大横坐标
+    xMax() {
+      let i = 0;
+      for (let index in this.seatList) {
+        if (this.seatList[index].gCol > 1) {
+          i = this.seatList[index].gCol;
+        }
+      }
+      return i;
+    },
+    //取最大纵坐标
+    yMax() {
+      let i = 0;
+      for (let index in this.seatList) {
+        if (this.seatList[index].gRow > i) {
+          i = this.seatList[index].gRow;
+        }
+      }
+      return i;
+    },
+    //竖的中轴线
+    middleLine() {
+      // 0.0125是.middle-line线本身宽度的一半 也需要居中
+      return (this.xMax / 2 + 1) * this.positionDistin - 0.0125;
+    },
+    //横中轴线
+    horizontalLine() {
+      // 0.0125是.horizontal-line线本身宽度的一半 也需要居中
+      return (this.yMax / 2 + 1) * this.positionDistin - 0.0125;
+    },
+    //根据影厅的大小缩放比例(需要把影厅全部显示出来)
+    seatScale() {
+     let seatScaleX = 1
+      let seatScaleY = 1
+      seatScaleX = this.seatAreaWidthRem / this.seatBoxWidth
+      seatScaleY = this.seatAreaHeightRem / this.seatBoxHeight
+      return seatScaleX < seatScaleY ? seatScaleX : seatScaleY
+    },
+    //让影厅居中展示的偏移值
+    seatBoxCenterMargin() {
+      return -(this.seatBoxWidth * this.seatScale) / 2;
+    },
+    // class 为 seatBox 的高度值 单位为rem
+    seatBoxHeight() {
+      // 纵轴总数量+1 * 座位偏移值 + 一个座位高度
+      return (this.yMax + 1) * this.positionDistin + this.height;
+    },
+    // class 为 seatBox 的宽度值 单位为rem
+    seatBoxWidth() {
+      // 横轴总数量+1 * 座位偏移值 + 一个座位宽度
+      return (this.xMax + 1) * this.positionDistin + this.width;
+    },
+    //缩略图宽 rem
+    thumbnailBoxWidth() {
+      return (
+        (this.xMax + 1) * this.thumbnailPositionDistin + this.thumbnailWidth
+      );
+    },
+    // 缩略图高 rem
+    thumbnailBoxHeight() {
+      return (
+        (this.yMax + 1) * this.thumbnailPositionDistin + this.thumbnailHeight
+      );
+    },
+    // 快速选择和选择座位组件component on-bind:is的值
+    selectedTabComponents() {
+      return this.selectedSeatList.length > 0
+        ? "SelectedTab"
+        : "QuickSelectTab";
+    },
+    //座位左侧标识栏
+    seatToolArr() {
+      let seatToolArr = [];
+      let yMax = this.yMax;
+      for (let i = 1; i <= yMax; i++) {
+        let el = this.seatList.find((item) => item.gRow === i);
+        if (el) {
+          seatToolArr.push(el.row);
+        } else {
+          seatToolArr.push("");
+        }
+      }
+      return seatToolArr;
     },
   },
 };
 </script>
 
-<style scoepd>
-.seatClass {
-  position: absolute;
-}
-.box {
-  position: relative;
-  margin-top: -40px;
-}
-.seatImgClass {
-  position: absolute;
+<style lang="scss" scoped>
+.buy-box {
+  position: fixed;
+  left: 0;
   top: 0;
-  left: 0;
-  height: 100%;
-}
-.title {
-  width: 100%;
-  height: 35px;
-  background-image: linear-gradient(45deg, #9fa5d5, #aebaf8);
-  text-align: center;
-  line-height: 35px;
-  color: #fff;
-  letter-spacing: 2px;
-}
-.titleInfo {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #ccc;
-  margin-top: 10px;
-  padding: 0 10px 0 10px;
-}
-.centerInfo {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-top: 10px;
-}
-.centerInfo2 {
-  display: flex;
-  align-items: center;
-}
-.screen {
-  width: 250px;
-  border: 30px solid #ccc;
-  border-color: #ccc transparent transparent transparent;
-  height: 20px;
-  margin: auto;
-  margin-top: 10px;
-}
-.screen-text {
-  text-align: center;
-  white-space: nowrap;
-  font-size: 20px;
-  font-weight: 600;
-  color: #fff;
-  margin-top: -30px;
-}
-.btn {
-  position: absolute;
+  right: 0;
   bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 35px;
-  background-image: linear-gradient(45deg, #9fa5d5, #aebaf8);
-  text-align: center;
-  line-height: 35px;
-  color: #fff;
+  background-color: #fff;
+  z-index: 999;
+  .top-nav {
+    background-color: #e54847 !important;
+    .van-nav-bar__title {
+      color: #fff;
+    }
+
+    .van-icon {
+      color: #fff;
+    }
+  }
+
+  .movie-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    font-family: 仿宋;
+  }
+  .plan-detail {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #888888;
+    height: 45px;
+    width: 100%;
+    background: #ffffff;
+    // padding: 15px;
+    .plan-detail-item {
+      width: 125px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .seat-detail {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 13px;
+    color: #888888;
+    height: 45px;
+    width: 100vw;
+    background: #f3f4f6;
+    padding: 0 10px 0 10px;
+  }
+  .seat-detail-item {
+    display: flex;
+    align-content: center;
+  }
+  .seatTypeClass {
+    display: block;
+    height: 17.5px;
+    line-height: 17.5px;
+    white-space: nowrap;
+  }
+  .thumbnailSeatClass {
+    position: absolute;
+  }
+  .seatBox {
+    position: absolute;
+    left: 50%;
+    transform-origin: 0rem 0rem 0rem;
+  }
+  .middle-line {
+    position: absolute;
+    height: 3rem !important;
+    border-right: 0.025rem rgba(0, 0, 0, 0.2) dashed;
+  }
+  .seatClass {
+    position: absolute;
+  }
+  .seatImgClass {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+  }
 }
 </style>

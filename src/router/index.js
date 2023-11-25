@@ -9,6 +9,7 @@ import HotMovieView from '../views/MovieViewSons/HotMovieView.vue'
 import RecommendView from '../views/VideoViewSons/RecommendView.vue'
 import AuthorizationView from '../views/AuthorizationView.vue'
 import LoginView from '../views/Authorization/LoginView.vue'
+import TickeTingViewVue from '../views/TickeTingView.vue'
 
 Vue.use(VueRouter)
 
@@ -125,7 +126,7 @@ const routes = [
     path: '/ticketing',
     name: 'ticketing',
     props: true,
-    component: () => import("../views/TickeTingView.vue")
+    component:TickeTingViewVue
   },
   {
     path: '/authorization',
@@ -144,10 +145,12 @@ const routes = [
       }
     ]
   },
-  // {
-  //   path:'/',
-  //   redirect: '/movie'
-  // }
+  {
+    path:'/movieticket',
+    name:'movieticket',
+    props:true,
+    component:() => import("../views/MovieTicketView.vue")
+  }
 ]
 
 const router = new VueRouter({
@@ -158,7 +161,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const { name } = to
-  if (name == 'my') {
+  if (name == 'my' || name == 'ticketing') {
     // 根据token是否存在做登录验证
     let token = localStorage.token;
 

@@ -170,7 +170,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .home {
     background-color: #f5f5f5;
 }
