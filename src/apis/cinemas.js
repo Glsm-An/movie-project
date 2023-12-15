@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const getCiemas = async (id) => {
-    let { data } = await axios.get(`https://apic.netstart.cn/maoyan/index/filterCinemas?ci=${id}`);
+    let { data } = await axios.get(`https://apis.netstart.cn/maoyan/index/filterCinemas?ci=${id}`);
     return data;
 }
 

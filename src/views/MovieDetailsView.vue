@@ -21,29 +21,20 @@
             <!-- 电影类型 -->
             <div class="movie-type">
               <span class="type">{{ type }}</span>
-              <span class="imax" v-if="movie.comScorePersona"
-                ><img src="../assets/2D-IMAX.png"
-              /></span>
+              <span class="imax" v-if="movie.comScorePersona"><img src="../assets/2D-IMAX.png" /></span>
             </div>
             <p>{{ star }}</p>
             <p>{{ movie.onlineDate }} / {{ movie.dur }}分钟</p>
           </div>
           <div class="btns">
-            <van-button
-              @click="setWish"
-              icon="https://obj.pipi.cn/festatic/asgard/resources/images/movie/want-to-watch.png"
-              type="info"
-              color="hsla(0,0%,100%,.35)"
-            >
+            <van-button @click="setWish"
+              icon="https://obj.pipi.cn/festatic/asgard/resources/images/movie/want-to-watch.png" type="info"
+              color="hsla(0,0%,100%,.35)">
               想看
             </van-button>
-            <van-button
-              @click="setWatched"
-              v-if="movie.globalReleased"
-              icon="https://obj.pipi.cn/festatic/asgard/resources/images/movie/star.png"
-              type="info"
-              color="hsla(0,0%,100%,.35)"
-            >
+            <van-button @click="setWatched" v-if="movie.globalReleased"
+              icon="https://obj.pipi.cn/festatic/asgard/resources/images/movie/star.png" type="info"
+              color="hsla(0,0%,100%,.35)">
               看过
             </van-button>
           </div>
@@ -74,107 +65,47 @@
               <div class="right">
                 <div class="stars-percent-bar">
                   <div class="stars">
-                    <van-rate
-                      v-model="five"
-                      readonly
-                      size="5"
-                      void-color="#3C2F21"
-                      color="#5D5246"
-                      gutter="1"
-                    />
+                    <van-rate v-model="five" readonly size="5" void-color="#3C2F21" color="#5D5246" gutter="1" />
                   </div>
                   <div class="bar">
-                    <van-progress
-                      :percentage="distribution[0].percent * 100"
-                      stroke-width="3"
-                      color="#7A7168"
-                      track-color="#403326"
-                      :show-pivot="false"
-                    />
+                    <van-progress :percentage="distribution[0].percent * 100" stroke-width="3" color="#7A7168"
+                      track-color="#403326" :show-pivot="false" />
                   </div>
                 </div>
                 <div class="stars-percent-bar">
                   <div class="stars">
-                    <van-rate
-                      v-model="four"
-                      readonly
-                      size="5"
-                      void-color="#3C2F21"
-                      color="#5D5246"
-                      gutter="1"
-                    />
+                    <van-rate v-model="four" readonly size="5" void-color="#3C2F21" color="#5D5246" gutter="1" />
                   </div>
                   <div class="bar">
-                    <van-progress
-                      :percentage="distribution[1].percent * 100"
-                      stroke-width="3"
-                      color="#7A7168"
-                      track-color="#403326"
-                      :show-pivot="false"
-                    />
+                    <van-progress :percentage="distribution[1].percent * 100" stroke-width="3" color="#7A7168"
+                      track-color="#403326" :show-pivot="false" />
                   </div>
                 </div>
                 <div class="stars-percent-bar">
                   <div class="stars">
-                    <van-rate
-                      v-model="three"
-                      readonly
-                      size="5"
-                      void-color="#3C2F21"
-                      color="#5D5246"
-                      gutter="1"
-                    />
+                    <van-rate v-model="three" readonly size="5" void-color="#3C2F21" color="#5D5246" gutter="1" />
                   </div>
                   <div class="bar">
-                    <van-progress
-                      :percentage="distribution[2].percent * 100"
-                      stroke-width="3"
-                      color="#7A7168"
-                      track-color="#403326"
-                      :show-pivot="false"
-                    />
+                    <van-progress :percentage="distribution[2].percent * 100" stroke-width="3" color="#7A7168"
+                      track-color="#403326" :show-pivot="false" />
                   </div>
                 </div>
                 <div class="stars-percent-bar">
                   <div class="stars">
-                    <van-rate
-                      v-model="two"
-                      readonly
-                      size="5"
-                      void-color="#3C2F21"
-                      color="#5D5246"
-                      gutter="1"
-                    />
+                    <van-rate v-model="two" readonly size="5" void-color="#3C2F21" color="#5D5246" gutter="1" />
                   </div>
                   <div class="bar">
-                    <van-progress
-                      :percentage="distribution[3].percent * 100"
-                      stroke-width="3"
-                      color="#7A7168"
-                      track-color="#403326"
-                      :show-pivot="false"
-                    />
+                    <van-progress :percentage="distribution[3].percent * 100" stroke-width="3" color="#7A7168"
+                      track-color="#403326" :show-pivot="false" />
                   </div>
                 </div>
                 <div class="stars-percent-bar">
                   <div class="stars">
-                    <van-rate
-                      v-model="one"
-                      readonly
-                      size="5"
-                      void-color="#3C2F21"
-                      color="#5D5246"
-                      gutter="1"
-                    />
+                    <van-rate v-model="one" readonly size="5" void-color="#3C2F21" color="#5D5246" gutter="1" />
                   </div>
                   <div class="bar">
-                    <van-progress
-                      :percentage="distribution[4].percent * 100"
-                      stroke-width="3"
-                      color="#7A7168"
-                      track-color="#403326"
-                      :show-pivot="false"
-                    />
+                    <van-progress :percentage="distribution[4].percent * 100" stroke-width="3" color="#7A7168"
+                      track-color="#403326" :show-pivot="false" />
                   </div>
                 </div>
               </div>
@@ -187,8 +118,8 @@
                   <span class="rank-num">{{ reputation.movieRank }}</span>
                 </div>
                 <div class="desc">
-                  <span class="first-word">{{ reputation.firstWord }}</span
-                  ><span class="second-word">{{ reputation.secondWord }}</span>
+                  <span class="first-word">{{ reputation.firstWord }}</span><span class="second-word">{{
+                    reputation.secondWord }}</span>
                 </div>
               </div>
             </div>
@@ -228,15 +159,8 @@
       <div class="videos">
         <p>宣传片</p>
         <div class="videos-list">
-          <video
-            :src="movie.videourl"
-            :poster="movie.videoImg"
-            width="100%"
-            height="200px"
-            autoplay
-            controls
-            preload
-          ></video>
+          <video :src="movie.videourl" :poster="movie.videoImg" width="100%" height="200px" autoplay controls
+            preload></video>
         </div>
       </div>
       <!-- 演职人员 -->
@@ -267,12 +191,7 @@
                 </template> -->
 
         <template>
-          <el-carousel
-            :interval="3000"
-            arrow="always"
-            indicator-position="none"
-            height="180px"
-          >
+          <el-carousel :interval="3000" arrow="always" indicator-position="none" height="180px">
             <el-carousel-item v-for="item in movie.photos" :key="item">
               <img :src="item" />
             </el-carousel-item>
@@ -391,6 +310,7 @@ export default {
   position: relative;
 
   .crumbs-nav {
+  font-size: 20px;
     margin-bottom: 15px;
     color: #ccc;
 
@@ -611,11 +531,9 @@ export default {
     width: 120px;
     height: 44px;
     box-sizing: border-box;
-    background-image: linear-gradient(
-      270deg,
-      rgba(0, 0, 0, 0.04),
-      rgba(226, 177, 117, 0.11)
-    );
+    background-image: linear-gradient(270deg,
+        rgba(0, 0, 0, 0.04),
+        rgba(226, 177, 117, 0.11));
     border-radius: 6px;
     padding: 4px;
     position: relative;
@@ -870,20 +788,24 @@ export default {
     height: 200px;
   }
 }
+
 .photos {
   .el-carousel__container {
     margin-top: 10px;
   }
+
   .el-carousel__item {
     img {
       width: 100%;
       height: 100%;
     }
-    
+
   }
 }
+</style>
+<style>
 .el-carousel__mask {
-      width: 0px !important;
-      background-color: transparent !important;
-    }
+  width: 0px !important;
+  background-color: transparent !important;
+}
 </style>
